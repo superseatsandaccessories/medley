@@ -62,12 +62,9 @@
                 strum: "D... D... (Let it ring)",
                 lyrics: [
                     "[C] Tumko bulaoon, [Am] yeh palkein bichhaoon",
-                    "[F] Kadam tum jahan jahan rakho",
-                    "[G] Zameen ko aasmaan banaoon",
-                    "[C] Sitaron se sajaoon",
-                    "[Am] Agar tum kaho...",
-                    "[F] Mai koi aisa geet gaoon",
-                    "[G] Ke aarzoo jagaoon",
+                    "[F] Kadam tum jahan jahan [G] rakho",
+                    "[C] Zameen ko aasmaan [Am] banaoon",
+                    "[F] Sitaron se [G] sajaoon",
                     "[C] Agar tum kaho..."
                 ]
             },
@@ -218,7 +215,7 @@
                 lyrics: [
                     "[C] Aaj kal tere mere pyar ke charche",
                     "[Am] Har zabaan par",
-                    "[F] (Sab ko maloom hai aur sabko khabar ho gayi)",
+                    "[F] Sab ko maloom hai aur sabko [G] khabar ho gayi",
                     "[C] Aaj kal tere mere pyar ke charche",
                     "[Am] Har zabaan par",
                     "[C] (Hold C Major Chord to End)"
@@ -241,7 +238,7 @@
                             const chord = (prevPart && prevPart.startsWith('[')) ? prevPart.replace(/[\[\]]/g, '') : null;
                             
                             return (
-                                <div key={index} className="flex flex-col items-start inline-flex mx-1">
+                                <div key={index} className="flex flex-col items-start inline-flex mx-1 relative top-2">
                                     {chord && (
                                         <span className="text-yellow-400 font-bold text-xl md:text-2xl mb-1 font-mono tracking-wider">
                                             {chord}
