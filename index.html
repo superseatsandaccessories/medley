@@ -21,6 +21,21 @@
         .chord-badge {
             font-family: 'Space Mono', monospace;
         }
+        
+        /* Custom Scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
 
         .pulse-slow { animation: pulse 2s infinite; }
         .pulse-med { animation: pulse 1.5s infinite; }
@@ -212,18 +227,16 @@
         ];
 
         // Component to parse and render a line with chords
-        const LyricLine = ({ line, isCurrent, isEdge }) => {
-            // Split by brackets e.g., "[C] text [Am] text"
+        const LyricLine = ({ line, isCurrent }) => {
             const parts = line.split(/(\[[^\]]+\])/g).filter(Boolean);
 
             return (
-                <div className={`flex flex-wrap justify-center items-end gap-1 my-4 transition-all duration-500 ${isCurrent ? 'opacity-100 scale-105' : 'opacity-40 scale-95'}`}>
+                <div className={`flex flex-wrap justify-center items-end gap-1 my-4 transition-all duration-500 ${isCurrent ? 'opacity-100' : 'opacity-40'}`}>
                     {parts.map((part, index) => {
                         if (part.startsWith('[') && part.endsWith(']')) {
                             const chord = part.replace(/[\[\]]/g, '');
-                            return null; // Don't render chord alone, wait for text
+                            return null;
                         } else {
-                            // Find the chord that came before this text part
                             const prevPart = index > 0 ? parts[index-1] : null;
                             const chord = (prevPart && prevPart.startsWith('[')) ? prevPart.replace(/[\[\]]/g, '') : null;
                             
@@ -277,6 +290,14 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [currentSongIndex]);
 
+            // Scroll to top when song changes
+            React.useEffect(() => {
+                const mainContainer = document.getElementById('main-content-area');
+                if (mainContainer) {
+                    mainContainer.scrollTop = 0;
+                }
+            }, [currentSongIndex]);
+
             if (!isStarted) {
                 return (
                     <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-center p-8">
@@ -319,45 +340,49 @@
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-slate-800 h-1">
+                    <div className="w-full bg-slate-800 h-1 z-20">
                         <div 
                             className="bg-gradient-to-r from-cyan-500 to-pink-500 h-1 transition-all duration-500" 
                             style={{ width: `${progress}%` }}
                         ></div>
                     </div>
 
-                    {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                    {/* Main Content Area - Scrollable */}
+                    <div id="main-content-area" className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 relative overflow-y-auto">
                         
                         {/* Background Pulse Effect */}
-                        <div className={`absolute inset-0 bg-gradient-to-b from-slate-800/20 to-transparent pointer-events-none ${currentSong.bpmClass}`}></div>
+                        <div className={`fixed inset-0 top-32 bottom-20 bg-gradient-to-b from-slate-800/20 to-transparent pointer-events-none ${currentSong.bpmClass}`}></div>
 
                         {/* Song Info Card */}
-                        <div className="z-10 w-full max-w-5xl">
-                            <div className="flex justify-between items-end mb-6 border-b border-slate-700 pb-4">
-                                <div>
-                                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-2 leading-tight">
-                                        {currentSong.title}
-                                    </h2>
-                                    <div className="text-slate-400 text-lg mb-2 italic">Movie: {currentSong.movie}</div>
-                                    <div className="flex gap-4 mt-2">
-                                        <span className="px-3 py-1 bg-pink-500/20 text-pink-300 rounded-full text-sm font-bold border border-pink-500/30">
-                                            {currentSong.tempo}
-                                        </span>
-                                        <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm font-bold border border-cyan-500/30 font-mono">
+                        <div className="z-10 w-full max-w-5xl pb-10">
+                            
+                            {/* Sticky Title Section */}
+                            <div className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur shadow-lg border-b border-slate-700/50 pb-4 pt-2 px-4 rounded-xl mb-8 transition-all">
+                                <div className="flex justify-between items-end">
+                                    <div>
+                                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-1 leading-tight">
+                                            {currentSong.title}
+                                        </h2>
+                                        <div className="text-slate-400 text-lg italic">Movie: {currentSong.movie}</div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                         <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm font-bold border border-cyan-500/30 font-mono text-right whitespace-nowrap">
                                             🎸 {currentSong.strum}
+                                        </span>
+                                        <span className="px-3 py-1 bg-pink-500/20 text-pink-300 rounded-full text-sm font-bold border border-pink-500/30 whitespace-nowrap">
+                                            {currentSong.tempo}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Lyrics Display */}
-                            <div className="space-y-2 text-center">
+                            <div className="space-y-4 text-center px-2">
                                 {currentSong.lyrics.map((line, idx) => (
                                     <LyricLine 
                                         key={idx} 
                                         line={line} 
-                                        isCurrent={true} // Keep all lines readable for playing
+                                        isCurrent={true} 
                                     />
                                 ))}
                             </div>
@@ -365,7 +390,7 @@
                     </div>
 
                     {/* Footer Controls */}
-                    <div className="bg-slate-800 p-4 border-t border-slate-700 flex justify-between items-center z-20">
+                    <div className="bg-slate-800 p-4 border-t border-slate-700 flex justify-between items-center z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.3)]">
                         <button 
                             onClick={prevSong}
                             disabled={currentSongIndex === 0}
